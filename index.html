@@ -1435,15 +1435,34 @@
                 <button onclick="performSearch()">Buscar</button>
             </div>
 
-            <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button onclick="performSearch()" style="padding: 0.8rem 1.5rem; background-color: #2d6a4f; color: white; border: none; border-radius: 4px; cursor: pointer;">Relevância</button>
-                <button onclick="performSearch()" style="padding: 0.8rem 1.5rem; background-color: white; color: #2d6a4f; border: 2px solid #2d6a4f; border-radius: 4px; cursor: pointer;">Preço: Menor para Maior</button>
-                <button onclick="performSearch()" style="padding: 0.8rem 1.5rem; background-color: white; color: #2d6a4f; border: 2px solid #2d6a4f; border-radius: 4px; cursor: pointer;">Mais Vendidos</button>
-                <button onclick="performSearch()" style="padding: 0.8rem 1.5rem; background-color: white; color: #2d6a4f; border: 2px solid #2d6a4f; border-radius: 4px; cursor: pointer;">Melhor Avaliação</button>
+            <!-- BOTÕES DE ORDENAÇÃO -->
+            <div style="margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <span style="color: #1a472a; font-weight: bold;">Ordenar por:</span>
+                
+                <button onclick="orderResults('relevancia')" class="sort-btn active" data-sort="relevancia" style="padding: 0.8rem 1.5rem; background-color: #2d6a4f; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                    ⭐ Relevância
+                </button>
+                
+                <button onclick="orderResults('preco-asc')" class="sort-btn" data-sort="preco-asc" style="padding: 0.8rem 1.5rem; background-color: white; color: #2d6a4f; border: 2px solid #2d6a4f; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                    💰 Preço: Menor para Maior
+                </button>
+                
+                <button onclick="orderResults('preco-desc')" class="sort-btn" data-sort="preco-desc" style="padding: 0.8rem 1.5rem; background-color: white; color: #2d6a4f; border: 2px solid #2d6a4f; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                    💰 Preço: Maior para Menor
+                </button>
+                
+                <button onclick="orderResults('vendidos')" class="sort-btn" data-sort="vendidos" style="padding: 0.8rem 1.5rem; background-color: white; color: #2d6a4f; border: 2px solid #2d6a4f; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                    🔥 Mais Vendidos
+                </button>
+                
+                <button onclick="orderResults('avaliacao')" class="sort-btn" data-sort="avaliacao" style="padding: 0.8rem 1.5rem; background-color: white; color: #2d6a4f; border: 2px solid #2d6a4f; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                    ⭐ Melhor Avaliação
+                </button>
             </div>
 
-            <div class="products-grid">
-                <div class="product-card" onclick="showPage('product-detail')">
+            <!-- GRID DE PRODUTOS COM CLASSE PARA ORDENAÇÃO -->
+            <div class="products-grid" id="search-results">
+                <div class="product-card" onclick="showPage('product-detail')" data-price="450" data-sales="520" data-rating="4">
                     <div class="product-image">👟</div>
                     <div class="product-info">
                         <div class="product-category">Chuteiras</div>
@@ -1457,7 +1476,7 @@
                     </div>
                 </div>
 
-                <div class="product-card" onclick="showPage('product-detail')">
+                <div class="product-card" onclick="showPage('product-detail')" data-price="520" data-sales="780" data-rating="5">
                     <div class="product-image">👟</div>
                     <div class="product-info">
                         <div class="product-category">Chuteiras</div>
@@ -1471,7 +1490,7 @@
                     </div>
                 </div>
 
-                <div class="product-card" onclick="showPage('product-detail')">
+                <div class="product-card" onclick="showPage('product-detail')" data-price="380" data-sales="450" data-rating="4">
                     <div class="product-image">👟</div>
                     <div class="product-info">
                         <div class="product-category">Chuteiras</div>
@@ -1485,7 +1504,7 @@
                     </div>
                 </div>
 
-                <div class="product-card" onclick="showPage('product-detail')">
+                <div class="product-card" onclick="showPage('product-detail')" data-price="299.90" data-sales="320" data-rating="3">
                     <div class="product-image">👟</div>
                     <div class="product-info">
                         <div class="product-category">Chuteiras</div>
@@ -2495,8 +2514,83 @@
             showSuccessMessage('Copiado para a área de transferência!');
         }
 
+        // ORDENAÇÃO DE RESULTADOS
+        function orderResults(sortType) {
+            // Atualizar botões ativos
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.style.backgroundColor = 'white';
+                btn.style.color = '#2d6a4f';
+                btn.style.border = '2px solid #2d6a4f';
+                btn.style.fontWeight = 'normal';
+            });
+            
+            const activeBtn = document.querySelector(`[data-sort="${sortType}"]`);
+            if (activeBtn) {
+                activeBtn.style.backgroundColor = '#2d6a4f';
+                activeBtn.style.color = 'white';
+                activeBtn.style.border = 'none';
+                activeBtn.style.fontWeight = 'bold';
+            }
+
+            // Obter todos os produtos
+            const productsContainer = document.getElementById('search-results');
+            const products = Array.from(productsContainer.querySelectorAll('.product-card'));
+
+            // Ordenar baseado na seleção
+            products.sort((a, b) => {
+                switch(sortType) {
+                    case 'relevancia':
+                        // Mantém ordem original (por relevância padrão)
+                        return 0;
+                    
+                    case 'preco-asc':
+                        // Menor para maior
+                        const priceA = parseFloat(a.dataset.price);
+                        const priceB = parseFloat(b.dataset.price);
+                        return priceA - priceB;
+                    
+                    case 'preco-desc':
+                        // Maior para menor
+                        const priceA2 = parseFloat(a.dataset.price);
+                        const priceB2 = parseFloat(b.dataset.price);
+                        return priceB2 - priceA2;
+                    
+                    case 'vendidos':
+                        // Mais vendidos (maior quantidade de vendas)
+                        const salesA = parseInt(a.dataset.sales);
+                        const salesB = parseInt(b.dataset.sales);
+                        return salesB - salesA;
+                    
+                    case 'avaliacao':
+                        // Melhor avaliação
+                        const ratingA = parseInt(a.dataset.rating);
+                        const ratingB = parseInt(b.dataset.rating);
+                        return ratingB - ratingA;
+                    
+                    default:
+                        return 0;
+                }
+            });
+
+            // Remover produtos atuais
+            productsContainer.innerHTML = '';
+
+            // Adicionar produtos ordenados
+            products.forEach(product => {
+                productsContainer.appendChild(product);
+            });
+
+            // Animação visual
+            productsContainer.style.opacity = '0.5';
+            setTimeout(() => {
+                productsContainer.style.opacity = '1';
+                productsContainer.style.transition = 'opacity 0.3s';
+            }, 100);
+        }
+
         // INICIALIZAÇÃO
         updateCartBadge();
     </script>
 </body>
 </html>
+
